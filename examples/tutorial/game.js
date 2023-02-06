@@ -1,20 +1,18 @@
+let start = true;
+
+let score = 0;
+
 let player = {};
 
 let items = [];
 
-let score = 0;
-
 // Games last 45 seconds
 let timeRemaining = 45;
 
-function create(game) {
-  player = {
-    x: 5,
-    y: 10
-  };
-}
-
 function update(game) {
+  if (start) {
+    return;
+  }
   for (let i = 0; i < items.length; i++) {
     const item = items[i];
     if (item.x == player.x && item.y == player.y) {
@@ -24,23 +22,26 @@ function update(game) {
     }
   }
 
+  // Only generate an item 5% of the time
   if (Math.random() < 0.05) {
     item = {
       x: Math.floor(Math.random() * 24),
-      y: Math.floor(Math.random() * 24)
+      y: Math.floor(Math.random() * 24),
     };
     if (item.x !== player.x || item.y !== player.y) {
       items.push(item);
     }
   }
 
-  for (item of items) {
+  for (var item of items) {
     game.setDot(item.x, item.y, Color.Green);
   }
 
   game.setDot(player.x, player.y, Color.Black);
 
-  game.setText(`Time left: ${timeRemaining}. Score: ${score}`);
+  game.setText("Score: ${score}");
+
+  game.setText(`Time left: ${timeRemaining}s. Score: ${score}`);
 
   if (timeRemaining <= 0) {
     game.setText(`Game over! Final score: ${score}`);
@@ -48,7 +49,21 @@ function update(game) {
   }
 }
 
+function create(game) {
+  player = {
+    x: 5,
+    y: 10,
+  };
+  game.setDot(player.x, player.y, Color.Black);
+  game.setText("Proverbs 3:5. Press arrow key to begin.");
+}
+
 function onKeyPress(direction) {
+  if (start) {
+    start = false;
+    return;
+  }
+
   if (direction == Direction.Up && player.y > 0) {
     player.y--;
   }
@@ -63,6 +78,12 @@ function onKeyPress(direction) {
   }
 }
 
+let config = {
+  create: create,
+  update: update,
+  onKeyPress: onKeyPress,
+};
+
 let interval = setInterval(decreaseTimer, 1000);
 
 function decreaseTimer() {
@@ -71,12 +92,6 @@ function decreaseTimer() {
     clearInterval(interval);
   }
 }
-
-let config = {
-  create: create,
-  update: update,
-  onKeyPress: onKeyPress
-};
 
 let game = new Game(config);
 game.run();
